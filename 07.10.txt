@@ -1,0 +1,266 @@
+--7/10
+--Q1.emp에서 ename을 empname으로 바꾸세요
+alter table emp rename column ename to empname;
+--Q2.gift에서 7번 노트북을 아이패드로 바꾸세요
+update gift set gname='아이패드' where gname='노트북';
+--Q3.gift에 10번 아이폰 9000001~1000000 한행을 추가하세요
+insert into gift values (10,'아이폰14',900001,1000000);
+--Q4.member에서 1003 서새알 멤버를 삭제하시오
+delete from member where no=1003;
+--Q5.emp에서 입사일이 82/01/23 인 사원의 이름,부서번호,급여를 출력하시오
+select empname 이름,deptno 부서번호,sal 급여 
+from emp 
+where hiredate='82/01/23';
+--Q6.emp에서 직무별로 최대급여,최소급여,총급여,평균급여를 출력하시오
+select job 직무,max(sal) 최대급여,min(sal) 최소급여,sum(sal) 총급여,round(avg(sal),0)평균급여
+from emp
+group by job;
+
+select * from emp;
+select * from gift;
+select * from member;
+
+--Join
+
+--1.emp와 dept를 조인해서 emp사람들의 부서명을 구해보자
+--사원명    부서명   
+
+--1
+select e.empname,d.dname
+from emp e,dept d
+where e.deptno=d.deptno;
+--2
+select empname,dname --테이블의 고유명일경우 e,d. 생략가능
+
+select e.empname,d.dname
+from emp e,dept d
+where e.deptno=d.deptno;
+
+
+--student와 professor를 조인하여 다음과 같이 출력하시오
+--학번    학생명    지도교수명
+select s.studno 학번,s.name 학생명,p.name 지도교수명
+from student s,professor p
+where s.profno=p.profno;
+
+--학번 학생명 제1전공명 제2전공명
+select s.studno, s.name 학생명,d.dname 제1전공명
+from student s,department d
+where s.deptno1=d.deptno;
+
+--교수명 직급 학과명
+select p.name 교수명,p.position 직급,d.dname 학과명
+from professor p,department d
+where p.deptno=d.deptno;
+
+--사원번호 사원명 근무도시
+select e.empno 사원번호,e.empname 사원명,d.loc 근무도시
+from emp e,dept d
+where e.deptno=d.deptno;
+
+--판매테이블
+--판매일자 과자명 전체판매액
+select pan.p_date 판매일자,pro.p_name 과자명,pan.p_total 전체판매액
+from panmae pan,product pro
+where pan.p_code=pro.p_code;
+
+select empname,deptno from emp;
+select * from professor;
+select * from student;
+select * from department;
+select * from emp;
+select * from dept;
+select * from product;
+select * from panmae; 
+
+--primary 키와 forign키를 생성한 조인테이블 만들어보기
+create sequence seq_shop;
+
+--shop테이블(부모)
+create table shop(shop_num number(5) primary key,
+sangname varchar2(30),color varchar2(20));
+
+--5개의 상품추가
+insert into shop values(seq_shop.nextval,'요가매트','pupple');
+insert into shop values(seq_shop.nextval,'아령','pink');
+insert into shop values(seq_shop.nextval,'밴드','green');
+insert into shop values(seq_shop.nextval,'기능성티','black');
+insert into shop values(seq_shop.nextval,'양말','gray');
+commit;
+
+--cart1..상품정보는 shop테이블의 shop_num값을 외부키로 지정
+create table cart1(idx number(5) primary key,
+shop_num number(5) constraint cart_fk_shopnum references shop(shop_num),
+cnt number(5),guipday date);
+
+--cart2..상품정보는 shop테이블의 shop_num값을 외부키로 지정
+--부모테이블의 상품을 지우면 그상품과 연결된 카트를 자동으로 지워준다
+create table cart2(idx number(5) primary key,
+shop_num number(5) references shop(shop_num) on delete cascade,
+cnt number(5),guipday date);
+
+--cart1에 상품추가_1번
+insert into cart1 values(seq_shop.nextval,1,2,sysdate);
+insert into cart1 values(seq_shop.nextval,3,4,sysdate);
+insert into cart1 values(seq_shop.nextval,1,3,sysdate);
+insert into cart1 values(seq_shop.nextval,5,6,sysdate);
+insert into cart1 values(seq_shop.nextval,4,4,sysdate);
+
+delete from cart1 where shop_num=4;
+delete from cart1 where shop_num=3;
+
+--cart2에 상품추가
+insert into cart2 values(seq_shop.nextval,1,5,sysdate);
+insert into cart2 values(seq_shop.nextval,3,2,sysdate);
+insert into cart2 values(seq_shop.nextval,1,6,sysdate);
+insert into cart2 values(seq_shop.nextval,5,2,sysdate);
+insert into cart2 values(seq_shop.nextval,4,7,sysdate);
+
+delete from cart2 where shop_num=4;
+
+cart1:부모 1,2,3,4 존재 cart2:부모:1,2,3
+
+--shop의 1번 상품 삭제?
+delete from shop where shop_num=4;
+
+--cart2에서 3번데이터 지워보자
+delete from shop where shop_num=1;
+--on delete cascade 때문에 제약없이 삭제가 된다
+delete from shop where shop_num=3;
+
+--cart1에 담긴상품을 shop테이블과 join해서 자세히 출력
+--방법1
+select c1.idx,s.shop_num,s.sangname,s.color,c1.cnt,c1.guipday
+from shop s,cart1 c1
+where s.shop_num=c1.shop_num;
+
+
+create sequence seq_menu;
+--부모테이블
+--menu 테이블
+create table menu(m_num number(5) primary key,
+m_name varchar2(30),price varchar2(30));
+
+insert into menu values(seq_menu.nextval,'유린기','20000');
+insert into menu values(seq_menu.nextval,'자장면','6000');
+insert into menu values(seq_menu.nextval,'탕수육','18000');
+insert into menu values(seq_menu.nextval,'깐풍기','19000');
+insert into menu values(seq_menu.nextval,'짬뽕','7000');
+commit;
+--자식테이블(자식테이블에 연결된 부모가 있어도 부모를 삭제할수있으며 부모테이블삭제시 자동으로 자식삭제)
+create sequence seq_MyOrder;
+
+create table MyOrder(o_num number(5) primary key,
+m_num number(5) constraint MyOrder_fk_m_num references menu(m_num),
+cnt number(5),o_date date);
+
+insert into MyOrder values(seq_MyOrder.nextval,1,2,sysdate);
+insert into MyOrder values(seq_MyOrder.nextval,2,3,sysdate);
+insert into MyOrder values(seq_MyOrder.nextval,3,4,sysdate);
+insert into MyOrder values(seq_MyOrder.nextval,4,5,sysdate);
+insert into MyOrder values(seq_MyOrder.nextval,5,7,sysdate);
+commit;
+
+select m.m_name,m.price,o.o_num,o.cnt,o.o_date
+from menu m,MyOrder o
+where m.m_num=o.m_num;
+
+commit; 
+select * from shop;
+select * from cart1;
+select * from cart2;
+
+select * from menu;
+select * from MyOrder;
+
+--------------------------------------------------------------------------------
+create table board (bno number(3) constraint board_pk_bno primary key,
+writer varchar2(20),
+subject varchar2(100),
+writeday date);
+
+--board에 5개 insert
+--부모
+insert into board values(seq_sawon.nextval,'김영환','ㅎㅇ',sysdate);
+insert into board values(seq_sawon.nextval,'강민혁','ㅇㅇ',sysdate);
+insert into board values(seq_sawon.nextval,'강성진','ㄴㄴ',sysdate);
+insert into board values(seq_sawon.nextval,'전영진','ㅅㅅ',sysdate);
+insert into board values(seq_sawon.nextval,'민영재','ㅎㅎ',sysdate);
+commit;
+
+--answer라는 댓글(자식)
+--부모글지우면 자식글 자동삭제되게
+create table answer (num number(5) constraint answer_pk_num primary key,
+bno number(3) constraint answer_fk_bno references board(bno) on delete cascade,
+nickname varchar2(20),content varchar2(30),writeday date);
+
+--원하는 글에 댓글추가하기
+insert into answer values(seq_sawon.nextval,78,'김영환','ㄳ',sysdate);
+insert into answer values(seq_sawon.nextval,79,'강민혁','ㅇㅇ',sysdate);
+insert into answer values(seq_sawon.nextval,80,'강성진','ㄷㄷ',sysdate);
+insert into answer values(seq_sawon.nextval,81,'전영진','ㅗ',sysdate);
+insert into answer values(seq_sawon.nextval,82,'민영재','wow',sysdate);
+commit;
+
+--join으로 출력
+--원글번호 작성자 작성자글 댓글단사람 댓글내용 원글날자 댓글날짜
+select b.bno,b.writer,b.subject,a.nickname,a.content,b.writeday,a.writeday
+from board b,answer a
+where b.bno=a.bno;
+
+--79번 원글
+delete from board where bno=79;
+select*from board;
+select*from answer;
+
+--board를 먼저삭제
+drop table board; --외래 키에 의해 참조되는 고유/기본 키가 테이블에 있습니다
+drop table answer;
+
+--shop,cart 모두 삭제
+--외부키로 연결이 된경우 자식테이블 먼저 삭제후 부모테이블 삭제가능
+drop table cart1;
+drop table cart2;
+drop table shop;
+
+================================================================================
+create sequence seq_food;
+
+--food 테이블 부모
+create table food (fno number(5) constraint fno_pk_num primary key,
+foodname varchar2(20),price number(5),shopname varchar2(30),loc varchar2(30));
+
+select * from food;
+--내용넣기
+insert into food values(seq_food.nextval,'양념치킨',20000,'페리카나','서울시 강남구 논현동');
+insert into food values(seq_food.nextval,'보쌈',30000,'원할머니보쌈','서울시 강남구 대치동');
+insert into food values(seq_food.nextval,'육회',15000,'광수육회','서울시 강남구 역삼동');
+insert into food values(seq_food.nextval,'초밥',16000,'스시롱롱','서울시 동작구 사당동');
+insert into food values(seq_food.nextval,'후라이드치킨',18000,'페리카나','서울시 강남구 논현동');
+commit;
+
+--jumun 테이블 자식
+create sequence seq_jumun;
+
+create table jumun (num number(5) constraint jumun_pk_num primary key,
+fno number(5) constraint jumun_fk_food references food(fno) on delete cascade,
+name varchar2(30),addr varchar2(30));
+
+--내용넣기
+insert into jumun values(seq_jumun.nextval,1,'김영환','서울시 강남구 논현동');
+insert into jumun values(seq_jumun.nextval,2,'전영진','서울시 강남구 대치동');
+insert into jumun values(seq_jumun.nextval,3,'강성진','서울시 강남구 역삼동');
+insert into jumun values(seq_jumun.nextval,4,'민영재','서울시 동작구 사당동');
+insert into jumun values(seq_jumun.nextval,5,'강민혁','서울시 강남구 논현동');
+commit;
+
+select*from jumun;
+select * from food;
+drop table jumun;
+drop table food;
+================================================================================
+주문번호 주문자 음식명 가격 상호명 가게위치 주문자위치
+
+select f.fno,j.name,f.foodname,f.price,f.shopname,f.loc,j.addr
+from food f,jumun j
+where f.fno=j.fno;

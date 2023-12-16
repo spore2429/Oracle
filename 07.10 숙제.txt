@@ -1,0 +1,36 @@
+--테이블명:snsboard
+
+--b_num: 기본키
+--nick:작성자 닉네임(문자열)
+--subject:제목(문자열)
+--content:내용(문자열)
+--wday: 현재날짜
+
+--최소 10개 인서트
+
+--자바 QuizConnectNewBoard
+
+--메서드에서 connection,statement,resultset 객체이용해서
+--새로만든 board를불러오세요
+
+--시퀀스
+create sequence seq_snsboard;
+drop table snsboard;
+--테이블
+create table snsboard(b_num number(5) CONSTRAINT b_no_pk_num primary key,
+nick varchar2(10),subject varchar2(20),content varchar2(20),
+wday date);
+
+select*from snsboard;
+--삽입
+insert into snsboard values(seq_snsboard.nextval,'ㅇㅇ','안녕하세요','ㅈㄱㄴ',sysdate);
+insert into snsboard values(seq_snsboard.nextval,'전영진','세모어깨','아닙니다',sysdate);
+insert into snsboard values(seq_snsboard.nextval,'강민혁','당근합니다','에어팟 15에 팔아요~',sysdate);
+insert into snsboard values(seq_snsboard.nextval,'ㅇㅇ','가입인사','안녕하세요',sysdate);
+insert into snsboard values(seq_snsboard.nextval,'신서호','3시까지모여','잠실새내역3번출구',sysdate);
+insert into snsboard values(seq_snsboard.nextval,'박세현','밥먹을사람','답장주세요',sysdate);
+insert into snsboard values(seq_snsboard.nextval,'김영환','오늘비옴','우산챙기셈',sysdate);
+insert into snsboard values(seq_snsboard.nextval,'이상민','영화보실분','범도2나옴',sysdate);
+insert into snsboard values(seq_snsboard.nextval,'이경환','피파들와','ㅈㄱㄴ',sysdate);
+insert into snsboard values(seq_snsboard.nextval,'강명근','오늘볼사람','강남역ㄱ',sysdate);
+commit;
